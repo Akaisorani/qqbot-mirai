@@ -178,17 +178,17 @@ def schedule_job(app, *args, **kw_args):
 
     def deco_func(func):
 
-        @app.onStage("start")
-        def scheduled_func(app):
-            if "app" in func.__globals__:
-                func.__globals__["app"]=app
+        # @app.onStage("start")
+        # def scheduled_func():
+            # if "app" in func.__globals__:
+            #     func.__globals__["app"]=app
 
             # scheduler = BackgroundScheduler()
-            scheduler = AsyncIOScheduler()
+        scheduler = AsyncIOScheduler()
 
-            scheduler.add_job(func, *args, **kw_args)
+        scheduler.add_job(func, *args, **kw_args)
 
-            scheduler.start()
+        scheduler.start()
 
         return func
 

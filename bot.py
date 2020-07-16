@@ -11,6 +11,7 @@ authKey = myconfig.authKey
 mirai_api_http_locate = myconfig.mirai_api_http_locate
 
 app = Mirai(f"mirai://{mirai_api_http_locate}?authKey={authKey}&qq={qq}")
+myconfig.app=app
 
 test_group_list=myconfig.test_group_list
 test_friend_list=myconfig.test_friend_list
