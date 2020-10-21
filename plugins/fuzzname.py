@@ -12,6 +12,13 @@ class Fuzzname(object):
         self.fuzzymap=dict()
         for name in namelis:
             self.fuzzymap[name+" "+self.pinyin.get_pinyin(name,'')]=name
+    
+    def add(self, namelis):
+        if not isinstance(namelis,list):
+            namelis=[namelis]
+        for name in namelis:
+            self.fuzzymap[name+" "+self.pinyin.get_pinyin(name,'')]=name
+        
 
     def predict(self, name):
         namepin=name+" "+self.pinyin.get_pinyin(name,'')

@@ -1,12 +1,12 @@
 from mirai import Mirai, Plain, At, AtAll, Image, Face, MessageChain, Friend, Group, Member, UnexpectedException, Cancelled
 import asyncio
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import os, sys
 import requests
 import pixiv_crawler as pc
-from setu import Pixivsetu
+from pixiv_setu import Pixivsetu
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -36,7 +36,7 @@ pixiv_setu=Pixivsetu()
 import time
 
 # @app.onStage("start")
-@schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*', second='*/30', timezone=pytz.timezone("Asia/Shanghai"))
+# @schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*', second='*/30', timezone=pytz.timezone("Asia/Shanghai"))
 # @schedule_job(app, 'cron', day_of_week='*', hour='5-23/6', minute='55', second='0', timezone=pytz.timezone("Asia/Shanghai"))
 async def hourcall():
     now = datetime.now(pytz.timezone('Asia/Shanghai'))
@@ -58,7 +58,7 @@ async def hourcall():
     msg=[Plain(text=text)]+setu_msg
 
 
-    group_id_list=myconfig.group_id_list
+    group_id_list=myconfig.group_medi_id_list
 
     try:
         for group_id in group_id_list:
@@ -74,6 +74,10 @@ async def job():
     now = datetime.now(pytz.timezone('Asia/Shanghai'))
     print(now.strftime('%H:%M:%S'))
 
+async def print_time():
+    now = datetime.now(pytz.timezone('Asia/Shanghai'))
+    print(now.strftime('%H:%M:%S'))    
+
 
 
 # from apscheduler.schedulers.blocking import BlockingScheduler
@@ -86,10 +90,17 @@ if __name__=="__main__":
     # BackgroundScheduler: 适合于要求任何在程序后台运行的情况，当希望调度器在应用后台执行时使用
     # scheduler = BackgroundScheduler()
     # scheduler = BlockingScheduler()
-    # scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler()
     # 采用corn的方式
     # scheduler.add_job(job, 'cron', day_of_week='*', hour='*', minute='*', second='*/10', timezone=pytz.timezone("Asia/Shanghai"))
     # scheduler.add_job(hourcall, 'cron', day_of_week='*', hour='*', minute='*', second='*/10', timezone=pytz.timezone("Asia/Shanghai"))
+
+    now = datetime.now()
+    delta = timedelta(days=0, seconds=5, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+    # scheduler.add_job(print_time, "interval", seconds=4, id="test1", max_instances=1, end_date=now+delta)
+    scheduler.start()
+    scheduler.add_job(func=print_time,id="test1", next_run_time=now+delta)
+    # scheduler.remove_job("test1")
 
     '''
     year (int|str) – 4-digit year
@@ -115,12 +126,12 @@ if __name__=="__main__":
     x,y,z    any    Fire on any matching expression; can combine any number of any of the above expressions
     '''
 
-    # scheduler.start()
+    
 
     print("asf")
     # time.sleep(30)
-    # asyncio.get_event_loop().run_forever()
-    app.run()
+    asyncio.get_event_loop().run_forever()
+    # app.run()
     print("ghj")
 
     pass

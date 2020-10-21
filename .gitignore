@@ -2,16 +2,17 @@
 test*
 apikeys.py
 .vscode/
-setu.py
 temp_save/
 default_save/
-cookies.txt
+cookies*
 record_material.txt
 record_peo.txt
 record_tags.txt
 .DS_Store
-imagesearch.py
 myconfig.py
+pixiv_crawler/
+memo_data/
+sanity_data.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

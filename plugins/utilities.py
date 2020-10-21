@@ -6,6 +6,7 @@ from typing import List, Union
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import myconfig
 
 test_group_list=[696694875]
 test_friend_list=[1224067801]
@@ -50,7 +51,6 @@ def multi_event_handler(app, event_types, filter=None):
                 msg=func(message, context=context)
                 # if test_group_list and group.id not in test_group_list: return None
                 if msg is None: raise Cancelled
-
                 await app.sendGroupMessage(group, msg)
         
         if "TempMessage" in event_types:
@@ -127,6 +127,7 @@ def assert_at(qq=None):
     "断言是否at了某人, 如果没有给出则断言是否at了机器人"
     def at_wrapper(message: MessageChain, context):
         app=context['app']
+        if context['event_type'] in ["FriendMessage", "TempMessage"]: return True
         at_set: List[At] = message.getAllofComponent(At)
         curr_qq = qq or app.qq
         if at_set:
@@ -150,6 +151,9 @@ def groups_restraint(*groups: List[Union[Group, int]]):
 
 
 # Scheduler
+scheduler = AsyncIOScheduler()
+scheduler.start()
+myconfig.scheduler = scheduler
 
 def schedule_job(app, *args, **kw_args):
     '''
@@ -178,17 +182,7 @@ def schedule_job(app, *args, **kw_args):
 
     def deco_func(func):
 
-        # @app.onStage("start")
-        # def scheduled_func():
-            # if "app" in func.__globals__:
-            #     func.__globals__["app"]=app
-
-            # scheduler = BackgroundScheduler()
-        scheduler = AsyncIOScheduler()
-
         scheduler.add_job(func, *args, **kw_args)
-
-        scheduler.start()
 
         return func
 

@@ -2,6 +2,7 @@ from mirai import Mirai, Plain, At, AtAll, Image, Face, MessageChain, Friend, Gr
 import asyncio
 from pydevtools import debug
 
+import plugins.utilities
 from plugins.utilities import multi_event_handler
 from plugins.utilities import start_with, text_match, regex_match, with_photo, assert_at, groups_restraint
 import myconfig
@@ -25,7 +26,9 @@ async def exception_handler_normal(context: UnexpectedException):
 from plugins import recom_tags
 from plugins import setu
 from plugins import pcr_tool
+from plugins import memo
 # from plugins import hourcall
+from plugins import sanity_tool
 
 
 if __name__ == "__main__":

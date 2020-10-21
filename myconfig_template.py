@@ -6,13 +6,29 @@ mirai_api_http_locate = 'localhost:8080/ws' # httpapi所在主机的地址端口
 
 ["test"]
 
-test_group_list=[11223344]
-test_friend_list=[987654321]
+test_group_list=[123456789]
+test_friend_list=[123456789]
 
 ["hourcall"]
 
-group_id_list=[11223344]
+group_id_list=[123456789]
 
-["sharing"]
+["share"]
 
 app = None
+scheduler = None
+
+["memo"]
+
+memo_dir = "./plugins/memo_data/data"
+memo_index_path = "./plugins/memo_data/memo_index.json"
+memo_index = None
+
+["sanity"]
+
+sanity_data_path = "./plugins/sanity_data.json"
+
+["setu"]
+pixiv_username = ""
+pixiv_password = ""
+setu_local_save_root = ""

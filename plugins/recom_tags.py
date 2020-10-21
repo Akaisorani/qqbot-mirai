@@ -452,7 +452,7 @@ class Character(object):
 
     def fetch_character_from_akmooncell(self, filename="chardata.json"):
         def fetch_data_with_json_format():
-            r=requests.get("http://ak.mooncell.wiki/load.php?debug=false&lang=zh-cn&modules=ext.gadget.charFilter&skin=vector&version=0vmy0ui")
+            r=requests.get("http://prts.wiki/load.php?debug=false&lang=zh-cn&modules=ext.gadget.charFilter&skin=vector&version=0vmy0ui")
             if r.status_code!=200: raise IOError("Cannot fetch char from akmooncell")
             rtext=r.text.replace("\n","")
             rtext=re.sub(r"<.*?>","",rtext)
@@ -495,7 +495,8 @@ class Character(object):
                 }
 
                 # link
-                char_link_root="http://ak.mooncell.wiki/w/"
+                char_link_root="http://prts.wiki/w/"
+                
                 url=char_link_root+urllib.parse.quote(name)
                 char_data[name]["link"]=url
 
@@ -503,7 +504,7 @@ class Character(object):
             return char_data
 
         def fetch_data_with_source():
-            r=requests.get("http://ak.mooncell.wiki/w/干员一览")
+            r=requests.get("http://prts.wiki/w/干员一览")
             if r.status_code!=200: raise IOError("Cannot fetch char from akmooncell")
             rtext=r.text
             rtext=rtext.replace("\n","")
@@ -548,7 +549,7 @@ class Character(object):
                 }
 
                 # link
-                char_link_root="http://ak.mooncell.wiki/w/"
+                char_link_root="http://prts.wiki/w/"
                 url=char_link_root+urllib.parse.quote(name)
                 char_data[name]["link"]=url
 
@@ -566,14 +567,14 @@ class Character(object):
 
     def fetch_enemy_from_akmooncell(self, filename="enemylist.json"):
         # get enemy data
-        r=requests.get("http://ak.mooncell.wiki/w/敌人一览")
+        r=requests.get("http://prts.wiki/w/敌人一览")
         if r.status_code!=200: raise IOError("Cannot fetch enemy from akmooncell")
         tree=html.fromstring(r.text)
 
         enemy_res_lis=tree.xpath("//div[@class='smwdata']")
 
         enemy_data=dict()
-        enemy_link_root="http://ak.mooncell.wiki/w/"
+        enemy_link_root="http://prts.wiki/w/"
         for enemy_a in enemy_res_lis:
             name=enemy_a.xpath("./@data-name")[0]
             # print("===="+name)
@@ -598,7 +599,7 @@ class Character(object):
         enemy_res_lis=tree.xpath("//tr[@data-param1]")
 
         enemy_data=dict()
-        enemy_link_root="http://ak.mooncell.wiki/w/"
+        enemy_link_root="http://prts.wiki/w/"
         for enemy_a in enemy_res_lis:
             name=enemy_a.xpath("./td[2]/a[1]/text()")[0]
             print("===="+name)
