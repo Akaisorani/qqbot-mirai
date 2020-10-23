@@ -35,18 +35,29 @@ class Pixivsetu(object):
         if not tags or tags=="normalrank":
             classi="normalrank"
             label=None
+        elif tags.split(" ")[0]=="user":
+            classi="illustrator"
+            label=tags.split(" ")[1]
         else:
             classi="tag"
             label=tags
 
         self.check_tempfile_overflow()
         setu_path=pc.random_one_by_classfi(classi, label)
-        # setu_path="./default_save/75568889_p0.png"
-        if not setu_path:return None
 
-        ret_msg=[
-            Image.fromFileSystem(setu_path)
-        ]
+        if isinstance(setu_path, list):
+            ret_msg=[]
+            text_lis=["{0}({1})".format(user[0],user[1]) for user in setu_path]
+            text="\n".join(text_lis)
+            ret_msg=[Plain(text=text)]
+        else:
+
+            # setu_path="./default_save/75568889_p0.png"
+            if not setu_path:return None
+
+            ret_msg=[
+                Image.fromFileSystem(setu_path)
+            ]
         
         # if os.path.getsize(setu_path)<4*1024*1024 and False:
         #     #UPLOAD
