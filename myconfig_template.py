@@ -32,3 +32,8 @@ sanity_data_path = "./plugins/sanity_data.json"
 pixiv_username = ""
 pixiv_password = ""
 setu_local_save_root = ""
+
+
+["msglog"]
+
+msglog={"group":{}}

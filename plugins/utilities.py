@@ -11,6 +11,15 @@ import myconfig
 test_group_list=[696694875]
 test_friend_list=[1224067801]
 
+def append_group_log(context, msg_id):
+    group_id=context["group"].id
+    msglog=myconfig.msglog
+
+    if group_id not in msglog["group"]:
+        msglog["group"][group_id]=[]
+    
+    msglog["group"][group_id].append(msg_id)
+
 def multi_event_handler(app, event_types, filter=None):
     if isinstance(event_types, str):
         event_types=[event_types]
@@ -51,7 +60,11 @@ def multi_event_handler(app, event_types, filter=None):
                 msg=func(message, context=context)
                 # if test_group_list and group.id not in test_group_list: return None
                 if msg is None: raise Cancelled
-                await app.sendGroupMessage(group, msg)
+                ret = await app.sendGroupMessage(group, msg)
+
+                append_group_log(context, ret.messageId)
+                
+                # print("RRRRRREEEEEEETTTTTT", ret)
         
         if "TempMessage" in event_types:
             @app.receiver("TempMessage")

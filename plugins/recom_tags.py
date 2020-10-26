@@ -8,6 +8,8 @@ from html import unescape
 from lxml import html
 import os, sys, re
 import json
+import pytz
+from datetime import datetime
 
 o_path = os.getcwd()
 sys.path.append(o_path)
@@ -16,6 +18,7 @@ sys.path.append(o_path)
 
 from utilities import multi_event_handler
 from utilities import start_with, text_match, regex_match, with_photo, assert_at, groups_restraint
+from utilities import schedule_job
 import myconfig
 
 from apikeys import *
@@ -108,6 +111,24 @@ def update_data(message, **kw_args):
     
     
     info_msg="update done"+"\nupdated {0}characters, {1}enemies".format(len(tags_recom.char_data.char_data),len(tags_recom.char_data.enemy_data))
+
+    ret_msg=[Plain(text=info_msg)]
+
+    return ret_msg
+
+@schedule_job(app, 'cron', day_of_week='*', hour='20', minute='15', second='0', timezone=pytz.timezone("Asia/Shanghai"))
+# @schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*', second='*/30', timezone=pytz.timezone("Asia/Shanghai"))
+# @multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[text_match(['update_data']), assert_at()])    #以关键词开头并需要at bot
+def update_data():
+
+    tags_recom.char_data.fetch_data()
+    print("fetch done")
+    tags_recom.char_data.extract_all_char()
+    print("extract done")
+    
+    
+    info_msg="update done"+"\nupdated {0}characters, {1}enemies".format(len(tags_recom.char_data.char_data),len(tags_recom.char_data.enemy_data))
+    print(info_msg)
 
     ret_msg=[Plain(text=info_msg)]
 

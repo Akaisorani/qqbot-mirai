@@ -29,6 +29,7 @@ from plugins import pcr_tool
 from plugins import memo
 # from plugins import hourcall
 from plugins import sanity_tool
+from plugins import recall
 
 
 if __name__ == "__main__":
