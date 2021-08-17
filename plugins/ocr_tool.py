@@ -86,10 +86,12 @@ if __name__=="__main__":
     url="https://gchat.qpic.cn/gchatpic_new/928486287/698793878-2394576410-EFE27EE550AA2B1E68923AD3A227A9B1/0?vuin=2473990407&amp;amp;term=2"
     url="https://c2cpicdw.qpic.cn/offpic_new/391809494//857ddb74-7a0d-40ae-98db-068f8c733c86/0?vuin=2473990407&amp;amp;term=2"
     url="http://gchat.qpic.cn/gchatpic_new/1224067801/696694875-2547587563-A3614012A84B473419EA835FC1700201/0?term=2"
+    url="https://s3.ax1x.com/2020/12/30/rLqrTI.jpg"
+    url2="https://s3.ax1x.com/2020/12/30/rLqW6g.jpg"
     # im=ocr_t.read_image("tags.jpg")
     # im=ocr_t.crop_image(im)
     # word_lis=ocr_t.ocr(im)
-    res=ocr_t.get_tags_from_url(url)
+    res=ocr_t.get_tags_from_url(url2)
     print(res)
         
             

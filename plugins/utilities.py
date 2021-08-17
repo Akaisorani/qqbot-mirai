@@ -45,7 +45,7 @@ def multi_event_handler(app, event_types, filter=None):
 
                 msg=func(message, context=context)
 
-                if msg is None: raise Cancelled
+                if not msg: raise Cancelled
                 await app.sendFriendMessage(friend, msg)
         
         if "GroupMessage" in event_types:
@@ -59,7 +59,7 @@ def multi_event_handler(app, event_types, filter=None):
 
                 msg=func(message, context=context)
                 # if test_group_list and group.id not in test_group_list: return None
-                if msg is None: raise Cancelled
+                if not msg: raise Cancelled
                 ret = await app.sendGroupMessage(group, msg)
 
                 append_group_log(context, ret.messageId)
@@ -76,7 +76,7 @@ def multi_event_handler(app, event_types, filter=None):
                 apply_filters(message, context)
 
                 msg=func(message, context=context)
-                if msg is None: raise Cancelled
+                if not msg: raise Cancelled
 
                 await app.sendTempMessage(group, member, msg)
         

@@ -55,7 +55,7 @@ def check_init_memo_index():
 
 check_init_memo_index()
 
-@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(["上传","upload"]), assert_at()])    #以关键词开头并需要at bot
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(["上传 ","upload "])])    #以关键词开头
 def memo_upload(message, **kw_args):
     context = kw_args["context"] if 'context' in kw_args else {}
 
@@ -70,7 +70,7 @@ def memo_upload(message, **kw_args):
 
     file_path=memo_dir+"/"+keyword+".json"
     with open(file_path,"w") as fp:
-        json.dump(local_contents,fp)
+        json.dump(local_contents,fp, ensure_ascii=False)
     
     memo_index[keyword]=file_path
     fuz.add(keyword)
@@ -124,7 +124,38 @@ def _memo_upload_par(message, context):
 
     return context
 
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(["上传撤销 ","upload_delete "])])    #以关键词开头
+def memo_upload_delete(message, **kw_args):
+    context = kw_args["context"] if 'context' in kw_args else {}
 
+    context=_memo_upload_delete_par(message, context)
+
+    keyword=context['keyword'] if 'keyword' in context else None
+    if not keyword:return [Plain(text="关键词为空")]
+
+    if keyword not in memo_index:      
+        return [Plain(text="未找到此关键词")]
+        
+    memo_index.pop(keyword)
+
+    flush_memo_index()
+
+    return [Plain(text="撤销成功")]
+
+def _memo_upload_delete_par(message, context):
+
+    stripped_arg = message.getAllofComponent(Plain)
+    stripped_arg = ''.join([x.toString() for x in stripped_arg]).strip()
+    stripped_arg=stripped_arg.replace("upload_delete","",1).replace("上传撤销","",1).strip()
+    if not stripped_arg: return context
+    keyword=stripped_arg
+  
+    print("upload_delete keyword", keyword)
+
+    if keyword:
+        context["keyword"]=keyword
+
+    return context
 
 @multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(["查 ","check_out "])])    #以关键词开头
 def memo_get(message, **kw_args):
@@ -160,6 +191,41 @@ def _memo_get_par(message, context):
         context['keyword'] = keyword
     return context
 
+
+# check_out without command ["查 ","check_out "]
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=None)    #以关键词开头
+def memo_simple_get(message, **kw_args):
+    context = kw_args["context"] if 'context' in kw_args else {}
+
+    context=_memo_simple_get_par(message, context)
+
+    keyword=context['keyword'] if 'keyword' in context else None
+    if not keyword: return None
+    if keyword not in memo_index:
+        return None
+    if not os.path.exists(memo_index[keyword]):
+        del memo_index[keyword]
+        flush_memo_index()
+        return None
+    with open(memo_index[keyword],"r") as fp:
+        js_data=json.load(fp)
+    ret_msg=local_contents2message_chain(js_data)
+
+    return ret_msg
+
+def _memo_simple_get_par(message, context):
+
+    stripped_arg = message.getAllofComponent(Plain)
+    stripped_arg = ' '.join([x.toString() for x in stripped_arg]).strip()
+    keyword=stripped_arg
+    
+    #print("check_out2 stripped_arg", stripped_arg)
+    #print("check_out2 keyword", keyword)
+
+    if keyword:
+        context['keyword'] = keyword
+    return context
+
 def get_local_contents(contents):
     res=[]
     for typ, cont in contents:
@@ -186,7 +252,7 @@ def local_contents2message_chain(contents):
 def flush_memo_index():
     global memo_index
     with open(memo_index_path,"w") as fp:
-        json.dump(memo_index,fp)
+        json.dump(memo_index,fp, ensure_ascii=False)
 
 
 

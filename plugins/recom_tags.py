@@ -34,7 +34,8 @@ qq = myconfig.qq
 authKey = myconfig.authKey
 mirai_api_http_locate = myconfig.mirai_api_http_locate
 
-app = Mirai(f"mirai://{mirai_api_http_locate}?authKey={authKey}&qq={qq}")
+# app = Mirai(f"mirai://{mirai_api_http_locate}?authKey={authKey}&qq={qq}")
+app = myconfig.app
 
 test_group_list=myconfig.test_group_list
 test_friend_list=myconfig.test_friend_list
@@ -173,18 +174,22 @@ def mati(message, **kw_args):
     name=context['name'] if 'name' in context else None
     if not name:
         # url="https://akaisorani.github.io/QQ-bot-Arknights-Helper/akaisora/plugins/materials"
-        url="https://img.nga.178.com/attachments/mon_202005/16/-klbw3Q5-43dbXeZ3uT3cS2io-1bf.png"
+        # url="https://img.nga.178.com/attachments/mon_202005/16/-klbw3Q5-43dbXeZ3uT3cS2io-1bf.png"
+        url="https://z3.ax1x.com/2021/03/24/6HgIP0.jpg"
         # url="https://arkonegraph.herokuapp.com/"
+        app_link="https://aog.wiki/"
 
         ret_msg=[
-            Image.fromBytes(get_bytes_image_from_url(url))
+            Image.fromBytes(get_bytes_image_from_url(url)),
+            Plain(text=app_link)
         ]
     else:
-        report = get_material_recom(name=name)
-        if report is None: return 
-        ret_msg=[
-            Plain(text=report)
-        ]
+        return
+        # report = get_material_recom(name=name)
+        # if report is None: return 
+        # ret_msg=[
+        #     Plain(text=report)
+        # ]
 
     return ret_msg
 
@@ -201,7 +206,7 @@ def _mati_par(message, context):
     return context
 
 
-@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(['stat',"统计"])])    #以关键词开头并需要at bot
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(['stat',"统计"])])    #以关键词开头
 def stat(message, **kw_args):
     context = kw_args["context"] if 'context' in kw_args else {}
 
@@ -234,6 +239,15 @@ def _stat_par(message, context):
     return context
 
 # functions
+
+session_prts=requests.session()
+print("try load prts cookies")
+with open(myconfig.cookies_prts,"r") as f:
+    cookies_js=json.load(f)
+    cookiejar=requests.utils.cookiejar_from_dict(cookies_js, cookiejar=None, overwrite=True)
+    session_prts.cookies=cookiejar
+
+
 
 def get_recomm_tags(tags: str, images: list) -> str:
     # 这里简单返回一个字符串
@@ -350,6 +364,9 @@ class Character(object):
             ranks=["5"]
         if "高级资深干员" in tags:
             ranks=["6"]
+        if "资深干员" in tags and "高级资深干员" in tags:
+            ranks=["5", "6"]
+        
         return ranks
         
     def get_peo_info(self, name=None):
@@ -413,11 +430,7 @@ class Character(object):
         # self.fetch_character_from_wikijoyme()
         self.fetch_character_from_akmooncell()
 
-        try:
-            self.fetch_enemy_from_akmooncell()
-        except Exception as e:
-            print(e)
-            self.fetch_enemy_from_wikijoyme()
+        self.fetch_enemy_from_akmooncell()
 
     def fetch_character_from_wikijoyme(self, filename="chardata.json"):
         r=requests.get("http://wiki.joyme.com/arknights/干员数据表")
@@ -529,7 +542,9 @@ class Character(object):
             if r.status_code!=200: raise IOError("Cannot fetch char from akmooncell")
             rtext=r.text
             rtext=rtext.replace("\n","")
-            rtext=re.sub(r"&lt;span style=.*?&gt;","",rtext)
+            rtext=re.sub(r"&lt;span style=&quot;display:none.*?&gt;(.*?)&lt;/span&gt;",r"（\1）",rtext)
+            rtext=re.sub(r"&lt;br/&gt;","\n",rtext)
+            rtext=re.sub(r"&lt;span.*?&gt;","",rtext)
             rtext=re.sub(r"&lt;/span&gt;","",rtext)
             
             tree=html.fromstring(rtext)
@@ -548,8 +563,8 @@ class Character(object):
                             +[char_a.xpath("./@data-position")[0]]\
                             +(["资深干员"] if char_data[name]["rank"]=="5" else [])\
                             +(["高级资深干员"] if char_data[name]["rank"]=="6" else [])
-                char_data[name]["obtain_method"]=char_a.xpath("./@data-approach")[0].split(" ")
-                char_data[name]["head_pic"]="http:"+char_a.xpath("./@data-icon")[0]
+                char_data[name]["obtain_method"]=char_a.xpath("./@data-approach")[0].split(", ")
+                char_data[name]["head_pic"]=char_a.xpath("./@data-icon")[0]
                 
                 
                 #deal head and data
@@ -587,6 +602,79 @@ class Character(object):
         return char_data
 
     def fetch_enemy_from_akmooncell(self, filename="enemylist.json"):
+        import threading, time
+        def try_enemy_head_pic_path(name, enemy_data):
+            def modify_data(url):
+                enemy_data_rlock.acquire()
+                enemy_data[name]["head_pic"]=url
+                enemy_data_rlock.release()
+            
+            print("%s is trying %s"%(threading.current_thread().name,name))
+            try:
+                print(name)
+                session_requests=requests.session()
+                for i in range(256):
+                    h=hex(i)[2:]
+                    if len(h)==1: h='0'+h
+                    url="http://prts.wiki/images/{0}/{1}/头像_敌人_{2}.png".format(h[0],h,name)
+                    r=session_requests.get(url, allow_redirects=False)
+                    if r.status_code==200:
+                        print('SUCCESS %s get %s'%(threading.current_thread().name,url))
+                        modify_data(url)
+                        return
+
+                print(name, "didnt find right url, return default")
+                return modify_data("http://prts.wiki/images/3/3e/头像_敌人_源石虫.png")
+
+            except Exception as e:
+                print(e)
+                print('FAIL %s error %s'%(threading.current_thread().name,name))                
+
+                return modify_data("http://prts.wiki/images/3/3e/头像_敌人_源石虫.png")
+        
+
+        print("begin fetch enemy")
+
+        # get enemy data
+        r=requests.get("http://prts.wiki/index.php?title=敌人一览/数据&action=raw")
+        if r.status_code!=200: raise IOError("Cannot fetch enemy from akmooncell")
+        enemy_data_raw=r.json()
+        enemy_data=dict()
+        enemy_link_root="http://prts.wiki/w/"
+        for enemy_a in enemy_data_raw:
+            name=enemy_a["name"]
+            # print("===="+name)
+            enemy_data[name]=dict()
+            link=enemy_link_root+urllib.parse.quote(enemy_a["enemyLink"])
+
+
+            enemy_data[name]["link"]=link
+            enemy_data[name]["type"]="enemy"
+            if name in self.enemy_data and "head_pic" in self.enemy_data[name] and (name=="源石虫" or self.enemy_data[name]["head_pic"]!=self.enemy_data["源石虫"]["head_pic"]):
+                enemy_data[name]["head_pic"]=self.enemy_data[name]["head_pic"]
+            else:
+                enemy_data[name]["head_pic"]=""
+
+        enemy_name_lis=list(enemy_data.keys())
+        threads=[]
+        enemy_data_rlock=threading.RLock()
+        for name in enemy_name_lis:
+            if not enemy_data[name]["head_pic"]:
+                t=threading.Thread(target=try_enemy_head_pic_path,args=(name,enemy_data))
+                threads.append(t)
+                while sum(map(lambda x:1 if x.is_alive() else 0,threads))>=50 : time.sleep(1)
+                t.start()
+        for t in threads :
+            if t.is_alive():t.join()
+        
+        with open(path_prefix+filename,"w",encoding='utf-8') as fp:
+            json.dump(enemy_data, fp)
+
+        print("end fetch enemy")
+        return enemy_data
+
+    """
+    def fetch_enemy_from_akmooncell(self, filename="enemylist.json"):
         # get enemy data
         r=requests.get("http://prts.wiki/w/敌人一览")
         if r.status_code!=200: raise IOError("Cannot fetch enemy from akmooncell")
@@ -604,12 +692,13 @@ class Character(object):
 
             enemy_data[name]["link"]=link
             enemy_data[name]["type"]="enemy"
-            enemy_data[name]["head_pic"]="http:"+enemy_a.xpath("./@data-file")[0]
+            enemy_data[name]["head_pic"]=enemy_a.xpath("./@data-file")[0]
         
         with open(path_prefix+filename,"w",encoding='utf-8') as fp:
             json.dump(enemy_data, fp)
 
         return enemy_data
+    """
 
     def fetch_enemy_from_wikijoyme(self, filename="enemylist.json"):
         # get enemy data
@@ -646,7 +735,7 @@ class Tags_recom(object):
         '支援机械', "机械",
         '近战位', '远程位',
         '近战', '远程',
-        '资深干员','高级资深干员', 
+        '资深干员','高级资深干员', '高级资深',
         '资深','高资', 
         #'女', '男',
         #'女性', '男性',
@@ -668,6 +757,8 @@ class Tags_recom(object):
         cob_lis.remove([])
         cob_lis=[(tags_lis, list(self.char_data.filter(tags_lis, flags))) for tags_lis in cob_lis]
         cob_lis=[x for x in cob_lis if x[1]!=[]]
+        # print(cob_lis)
+        # char_data[name]
         
         # print("")
         # for x in cob_lis:
@@ -789,7 +880,7 @@ class Tags_recom(object):
     def strip_tags(self, tags):
         restags=[]
         for tag in tags:
-            if tag in ["高级资深干员","高资"]:
+            if tag in ["高级资深干员","高资","高级资深"]:
                 restags.append("高级资深干员")
             elif tag in ["资深干员","资深"]:
                 restags.append("资深干员")
@@ -828,9 +919,31 @@ class Tags_recom(object):
             if tag not in self.all_tags:
                 return False
         return True
+
+
+    def split_tags(self, t_tag):
+        rest_tag=t_tag[:]
+        flag=True
+        tag_lis=[]
+        for tag in self.all_tags:
+            if rest_tag==tag:
+                return [tag]
+        for tag in self.all_tags:
+            if tag in rest_tag:
+                res=self.split_tags(rest_tag.replace(tag,""))
+                if res:
+                    return [tag]+res
+        return []
         
     def filter_legal_tags(self, tags):
         if not tags: return []
+        new_tags=[]
+        for tag in tags:
+            split_res=self.split_tags(tag)
+            new_tags.append(tag)
+            if len(split_res)>1:new_tags.extend(split_res)
+        tags=new_tags
+        # print(new_tags)
         res=[]
         for tag in tags:
             if tag in self.all_tags:
@@ -867,6 +980,7 @@ class Tags_recom(object):
                 return None
         
         tags, flags=self.split_flags(tags)
+        # print(tags, flags)
 
         if not self.check_legal_tags(tags):
             print("MYDEBUG no legal tags")

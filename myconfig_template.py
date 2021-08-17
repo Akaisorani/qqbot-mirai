@@ -12,6 +12,18 @@ test_friend_list=[123456789]
 ["hourcall"]
 
 group_id_list=[123456789]
+group_mrfz_cake_id_list=[123456789]
+
+["weibo"]
+
+group_mrfz_weibo_id_list=[123456789]
+
+["heartbeat"]
+group_heartbeat_list=[123456789]
+
+["pic_collect"]
+group_pic_collect_list=[123456789]
+
 
 ["share"]
 
@@ -37,3 +49,13 @@ setu_local_save_root = ""
 ["msglog"]
 
 msglog={"group":{}}
+
+["recomtag"]
+
+cookies_prts = "./cookies_prts.txt"
+
+["pic_collector"]
+
+repo_link=""
+repo_upload_link=""
+repo_download_link=""

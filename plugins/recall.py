@@ -63,9 +63,11 @@ async def recall(app: Mirai, group: Group, member: Member, message: MessageChain
 
     group_id=group.id
 
-    msg_id=msglog["group"][group_id][-1]
 
     try:
+        
+        msg_id=msglog["group"][group_id][-1]
+
         ret = await app.revokeMessage(msg_id)
 
         text="撤回"+("成功" if ret else "失败")

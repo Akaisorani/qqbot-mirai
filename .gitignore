@@ -13,6 +13,7 @@ myconfig.py
 pixiv_crawler/
 memo_data/
 sanity_data.json
+nohupoutput.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

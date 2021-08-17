@@ -79,6 +79,50 @@ async def print_time():
     print(now.strftime('%H:%M:%S'))    
 
 
+# @schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*', second='*/30', timezone=pytz.timezone("Asia/Shanghai"))
+# @schedule_job(app, 'cron', day_of_week='*', hour='12', minute='0', second='0', timezone=pytz.timezone("Asia/Shanghai"))
+async def mrfz_cake():
+    now = datetime.now(pytz.timezone('Asia/Shanghai'))
+    timetext=now.strftime('%H:%M:%S')
+
+    url="https://z3.ax1x.com/2021/04/26/gSEHd1.jpg"
+    r=requests.get(url,timeout=30)
+    buffer=r.content
+
+    msg=[Image.fromBytes(buffer)]
+
+    group_id_list=myconfig.group_mrfz_cake_id_list
+
+    try:
+        for group_id in group_id_list:
+            await app.sendGroupMessage(group_id, msg)
+            # await app.sendGroupMessage(group_id, [Plain(text=f'现在时间 {timetext}')])
+
+    except Exception as e:
+        print(e)
+        # pass
+
+# @schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*', second='*/20', timezone=pytz.timezone("Asia/Shanghai"))
+@schedule_job(app, 'cron', day_of_week='*', hour='*', minute='*/5', second='0', timezone=pytz.timezone("Asia/Shanghai"))
+async def heartbeat():
+    now = datetime.now(pytz.timezone('Asia/Shanghai'))
+    timetext=now.strftime('%H:%M:%S')
+
+    msg=[Plain(text=timetext)]
+
+    group_id_list=myconfig.group_heartbeat_list
+
+    try:
+        for group_id in group_id_list:
+            await app.sendGroupMessage(group_id, msg)
+            # await app.sendGroupMessage(group_id, [Plain(text=f'现在时间 {timetext}')])
+
+    except Exception as e:
+        print(e)
+        print("heartbeat fail, going to kill mirai")
+        os.system("ps -aux|grep '/opt/java/jdk1.8.0_144/bin/java -jar mirai-console-wrapper-1.3.0.jar' |grep -v grep | awk '{print $2}' | xargs kill -9")
+        # pass
+
 
 # from apscheduler.schedulers.blocking import BlockingScheduler
 

@@ -27,9 +27,11 @@ from plugins import recom_tags
 from plugins import setu
 from plugins import pcr_tool
 from plugins import memo
-# from plugins import hourcall
+from plugins import hourcall
 from plugins import sanity_tool
 from plugins import recall
+from plugins import weibo_rss
+from plugins import pic_collector
 
 
 if __name__ == "__main__":
