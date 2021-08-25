@@ -53,6 +53,7 @@ msglog={"group":{}}
 ["recomtag"]
 
 cookies_prts = "./cookies_prts.txt"
+group_recomtag_id_list=[123456789]
 
 ["pic_collector"]
 

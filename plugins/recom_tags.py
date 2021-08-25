@@ -39,11 +39,16 @@ app = myconfig.app
 
 test_group_list=myconfig.test_group_list
 test_friend_list=myconfig.test_friend_list
+group_recomtag_id_list=myconfig.group_recomtag_id_list
 
 # """
 @multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=None)
 def tagrc(message, **kw_args):
     context = kw_args["context"] if 'context' in kw_args else {}
+
+    if "group" in context:
+        group_id=context["group"].id
+        if group_id and group_id not in group_recomtag_id_list: return []
 
     # parse message
     context = _tagrc_par(message, context)
@@ -80,7 +85,7 @@ def _tagrc_par(message, context):
 # """
 
 
-@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[text_match(['hello', 'help', '帮助']), assert_at()])    #以关键词开头并需要at bot
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[text_match(['help', '帮助']), assert_at()])    #以关键词开头并需要at bot
 def hello(message, **kw_args):
 
     info_msg="""明日方舟 公开招募助手机器人
@@ -135,7 +140,7 @@ def update_data():
 
     return ret_msg
 
-@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(['tell'])])    #以关键词开头并需要at bot
+@multi_event_handler(app, ["FriendMessage", "GroupMessage", "TempMessage"], filter=[start_with(['tell'])])    #以关键词开头
 def tell(message, **kw_args):
     context = kw_args["context"] if 'context' in kw_args else {}
 
